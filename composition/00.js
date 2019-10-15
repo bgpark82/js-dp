@@ -68,9 +68,6 @@ const Task = class {
   sortDate() {
     throw "override";
   }
-  toggle() {
-    throw "override";
-  }
 };
 
 const TaskItem = class extends Task {
@@ -89,7 +86,7 @@ const TaskItem = class extends Task {
     return this._date > task._date;
   }
   toggle() {
-    this.isComplete = !this.isComplete;
+    this._isComplete = !this._isComplete;
   }
 };
 
@@ -178,7 +175,7 @@ const DomRenderer = class {
         el(
           "button",
           "innerHTML",
-          item.isComplete() ? "progress" : "complete",
+          !item.isComplete() ? "progress" : "complete",
           "addEventListener",
           ["click", _ => this.toggle(item)]
         ),
