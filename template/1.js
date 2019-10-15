@@ -70,5 +70,4 @@ const Table = (_ => {
   }; // class는 바꿀 수 없으므로 const
 })();
 const table = new Table("#data");
-console.log(table);
 table.load("api.json"); // 1. 사용하는 코드를 먼저 만들고
