@@ -8,6 +8,10 @@ const Task = class {
         this._isComplete = false;
     }
 
+    isComplete(){
+        return this._isComplete
+    }
+
     // 정렬기준은 Task가 가지고 있으므로 Task에 책임이 있다 
     // 현재의 Task과 다른 Task를 비교
     // 얘는 어쨌든 정렬했으니까 책임을 다했다.
@@ -34,18 +38,23 @@ const TaskList = class {
     // array 함수를 사용하는 순간 내용물은 Task가 된다.
     // Task를 구하게 되면 나머지는 Task의 책임이 된다.
     // 
-    byDate(){
-        this._getSort("date")
+    byDate(stateGroup = true){
+        return this._getList("date")
     }
 
-    byTitle() {
-        this._getSort("title")
+    byTitle(stateGroup = true) {
+        return this._getList("title")
     }
 
-    _getSort(criteria){
+    _getList(sort, stateGroup){
         const list = this._list;
-        const s = taskSort[criteria]
-        list.sort(s);
+        const s = taskSort[sort]
+        return !stateGroup 
+        // 데이터값을 수정할 떄는 리스트를 복사해서 사용
+        // 원본데이터를 보존 할 수 있다.
+        ? [...list].sort(s) 
+        : [...list.filter(v => v.isComplete()).sort(s),
+           ...list.filter(v => !v.isComplete()).sort(s)]
     }
 }
 
@@ -65,4 +74,7 @@ list2.add("지라 클라우드 접속")
 list2.add("지라 종료")
 list2.byTitle();
 console.log(list1)
+// 원본을 보존한 형태
+// byTitle() 실행한 값만 달라진다.
 console.log(list2)
+console.log(list2.byTitle())
