@@ -6,6 +6,13 @@ const Task = class {
         this._title = title;
         this._date = date;
         this._isComplete = false;
+        // Task도 자식을 가지는 형태로 바뀌었다.
+        this._list = [];
+    }
+
+    // Task의 sub리스트를 추가
+    add(title, date = Date.now()) {
+        this._list.push(new Task(title, date));
     }
 
     isComplete(){
@@ -21,6 +28,19 @@ const Task = class {
 
     sortDate(task) {
         return (this._title > task._title) ? 1 : -1;
+    }
+
+    _getList(sort, stateGroup){
+        const list = this._list;
+        const s = taskSort[sort]
+        return {
+            task:this,
+            sub:!stateGroup 
+        // 데이터값을 수정할 떄는 리스트를 복사해서 사용
+        // 원본데이터를 보존 할 수 있다.
+        ? [...list].sort(s) 
+        : [...list.filter(v => v.isComplete()).sort(s),
+           ...list.filter(v => !v.isComplete()).sort(s)]}
     }
 }
 
@@ -49,12 +69,12 @@ const TaskList = class {
     _getList(sort, stateGroup){
         const list = this._list;
         const s = taskSort[sort]
-        return !stateGroup 
+        return (!stateGroup 
         // 데이터값을 수정할 떄는 리스트를 복사해서 사용
         // 원본데이터를 보존 할 수 있다.
         ? [...list].sort(s) 
         : [...list.filter(v => v.isComplete()).sort(s),
-           ...list.filter(v => !v.isComplete()).sort(s)]
+           ...list.filter(v => !v.isComplete()).sort(s)]).map(v => v._getList());
     }
 }
 
@@ -76,5 +96,6 @@ list2.byTitle();
 console.log(list1)
 // 원본을 보존한 형태
 // byTitle() 실행한 값만 달라진다.
+// 결국 다른 값만 보여준 것
 console.log(list2)
 console.log(list2.byTitle())
