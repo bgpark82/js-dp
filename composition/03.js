@@ -1,10 +1,10 @@
 // 1. 만들기 쉬운 Entity 먼저 생성
 const Task = class {
-    constructor(title){
+    constructor(title, date){
         // 은닉
         if(!title) throw "invalid title";
         this._title = title;
-        this._date = new Date();
+        this._date = date;
         this._isComplete = false;
     }
 
@@ -27,8 +27,8 @@ const TaskList = class {
         this._list = [];
     }
 
-    add(title) {
-        this._list.push(new Task(title));
+    add(title, date = Date.now()) {
+        this._list.push(new Task(title, date));
     }
 
     // array 함수를 사용하는 순간 내용물은 Task가 된다.
