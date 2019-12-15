@@ -27,7 +27,6 @@ const Task = class {
   }
   getResult(sort, stateGroup) {
     const list = this._list;
-    console.log(this);
     return {
       item: this,
       children: (!stateGroup
@@ -58,37 +57,17 @@ const TaskItem = class extends Task {
     this._isComplete = false;
   }
 
-  isComplete() {
-    return this._isComplete;
-  }
-  sortTitle(task) {
-    return this._title > task._title;
-  }
-  sortDate(task) {
-    return this._date > task._date;
-  }
-  toggle() {
-    this.isComplete = !this.isComplete;
-  }
+  isComplete() {return this._isComplete;}
+  sortTitle(task) {return this._title > task._title;}
+  sortDate(task) {return this._date > task._date;}
+  toggle() {this._isComplete = !this._isComplete;}
 };
 
 const TaskList = class extends Task {
-  constructor(title) {
-    super(title);
-  }
+  constructor(title) {super(title);}
   isComplete() {}
-  sortTitle() {
-    return this;
-  }
-  sortDate() {
-    return this;
-  }
-  // byTitle(stateGroup = true) {
-  //   return this.getResult(Task.title, stateGroup);
-  // }
-  // byDate(stateGroup = true) {
-  //   return this.getResult(Task.date, stateGroup);
-  // }
+  sortTitle() {return this;}
+  sortDate() {return this;}
 };
 
 const DomRenderer = class {
@@ -96,7 +75,6 @@ const DomRenderer = class {
     this._parent = parent;
     this._list = list;
     this._sort = Task.title;
-    // this._sort = Task.byTitle;
   }
   add(parent, title, date) {
     parent.add(new TaskItem(title, date));
@@ -115,26 +93,15 @@ const DomRenderer = class {
   render() {
     const parent = this._parent;
     parent.innerHTML = "";
-    parent.appendChild(
-      "title,date"
-        .split(",")
-        .reduce(
-          (nav, c) => (
+    parent.appendChild("title,date".split(",")
+        .reduce((nav, c) => (
             nav.appendChild(
-              el(
-                "button",
-                "innerHTML",
-                c,
-                "@fontWeight",
-                this._sort == c ? "bold" : "normal",
-                "addEventListener",
-                ["click", e => ((this._sort = Task[c]), this.render())]
-              )
-            ),
-            nav
-          ),
-          el("nav")
-        )
+              el("button",
+                "innerHTML",c,
+                "@fontWeight",this._sort == c ? "bold" : "normal",
+                "addEventListener",["click", e => (this._sort = Task[c],  this.render())])
+            ),nav)
+        ,el("nav"))
     );
     this._render(parent, this._list, this._list.getResult(this._sort), 0);
   }
@@ -145,39 +112,24 @@ const DomRenderer = class {
       temp.push(el("h2", "innerHTML", item._title));
     } else {
       temp.push(
-        el(
-          "h3",
-          "innerHTML",
-          item._title,
-          "@textDecoration",
-          item.isComplete() ? "line-through" : "none"
-        ),
-        el(
-          "time",
-          "innerHTML",
-          item._date.toString,
-          "datetime",
-          item._date.toString()
-        ),
-        el(
-          "button",
-          "innerHTML",
-          item.isComplete() ? "progress" : "complete",
-          "addEventListener",
-          ["click", _ => this.remove(parent, item)]
-        )
-      );
+        el("h3",
+          "innerHTML",item._title,
+          "@textDecoration",item.isComplete() ? "line-through" : "none"),
+        el("time",
+          "innerHTML",item._date.toString(),
+          "datetime",item._date.toString()),
+        el("button",
+          "innerHTML",item.isComplete() ? "progress" : "complete",
+          "addEventListener",["click", _ => this.toggle(item)]),
+        el("button",
+          "innerHTML","remove",
+          "addEventListener",["click", _ => this.remove(parent, item)]));
     }
-    const sub = el(
-      "section",
-      "appendChild",
-      el("input", "type", "text"),
-      "appendChild",
-      el("button", "innerHTML", "addTask", "addEventListener", [
-        "click",
-        e => this.add(item, e.target.previousSibling.value)
-        // e => console.log(this)
-      ])
+    const sub = el("section",
+        "appendChild",el("input", "type", "text"),
+        "appendChild",el("button", 
+            "innerHTML", "addTask", 
+            "addEventListener", ["click",e => this.add(item, e.target.previousSibling.value)])
     );
     children.forEach(v => [this._render(sub, item, v, depth + 1)]);
     temp.push(sub);

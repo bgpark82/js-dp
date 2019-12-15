@@ -68,7 +68,8 @@ const TaskList = class {
   _getList(sort, stateGroup) {
     const list = this._list;
     const s = taskSort[sort];
-    return (!stateGroup
+    return (
+      !stateGroup
       ? [...list].sort(s)
       : [
           ...list.filter(v => !v.isComplete()).sort(s),

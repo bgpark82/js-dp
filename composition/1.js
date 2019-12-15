@@ -20,6 +20,7 @@ const Task = class {
     return this._title > task._title;
   }
   sortDate(task) {
+    console.log(this._title > task._title)
     return this._date > task._date;
   }
 };
@@ -64,10 +65,13 @@ const TaskList = class {
 const list1 = new TaskList("비사이드");
 list1.add("지라 설치");
 list1.add("지라 클라우즈 접속");
-list1.byDate();
-const list2 = new TaskList("s75");
-list2.add("2강 답안 작성");
-list2.add("3강 교안 작성");
+list1.add("지라 종료");
+console.log(list1.byDate());
+// const list2 = new TaskList("s75");
+// list2.add("2강 답안 작성");
+// list2.add("3강 교안 작성");
 
-console.log(list1.byTitle());
-console.log(list2.byDate());
+// console.log(list1.byTitle());
+// console.log(list2.byDate());
+// console.log(list1)
+// console.log(list2)

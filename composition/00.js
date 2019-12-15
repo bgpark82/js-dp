@@ -4,6 +4,9 @@ const el = (tag, ...attr) => {
   for (let i = 0; i < attr.length; ) {
     const key = attr[i++];
     const value = attr[i++];
+    console.log(el);
+    console.log(key);
+    console.log(el[key]);
     if (typeof el[key] == "function")
       el[key](...(Array.isArray(value) ? value : [value]));
     else if (key[0] == "@") el.style[key.substr(1)] = value;
@@ -11,18 +14,6 @@ const el = (tag, ...attr) => {
   }
   return el;
 };
-
-el(
-  "section",
-  "appendChild",
-  el("input", "type", "text"),
-  "appendChild",
-  el("button", "innerHTML", "addTask", "addEventListener", [
-    "click",
-    // e => this.add(item, e.target.previousSibling.value)
-    e => console.log(this)
-  ])
-);
 
 const Task = class {
   static title(a, b) {
@@ -210,8 +201,7 @@ item1.add(sub1);
 const subsub1 = new TaskItem("subsub1");
 sub1.add(subsub1);
 
-const test = list1.getResult(Task.title);
-console.log(test);
+list1.getResult(Task.title);
 
 const todo = new DomRenderer(list1, sel("#todo"));
 todo.render();
