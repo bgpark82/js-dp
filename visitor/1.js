@@ -5,7 +5,7 @@ const el = (tag, ...attr) => {
     const k = attr[i++];
     const v = attr[i++];
     if (typeof el[k] == "function") el[k](...(Array.isArray(v) ? v : [v]));
-    else if (k[0] = "@") el.style[k.substr(1)] = v;
+    else if (k[0] == "@") el.style[k.substr(1)] = v;
     else el[k] = v; 
   }
   return el;
@@ -14,12 +14,7 @@ const err = (v = "invalid") => {throw v};
 const override = _ => err("override");
 const prop = (t, p) => Object.assign(t, p);
 const is = (t, p) => t instanceof p;
-const d64 = v => decodeURIComponent(
-    atob(v).split("").map(c => "%" + c.charCodeAt(0).toString()));
-const snack = v => {
-  sel("#snack").innerHTML = v;
-  setTimeout(_ => (sel("#snack").innerHTML = ""), 3500);
-};
+
 
 
 const Task = class {
@@ -139,7 +134,7 @@ const DomVisitor = class extends Visitor {
   }
   _list(task){
     this._current.appendChild(el('h2','innerHTML',task.title))
-    console.log(this._current)
+
   }
   _item(task){
     [el('h3','innerHTML',task.title, 
@@ -148,7 +143,7 @@ const DomVisitor = class extends Visitor {
     el('button','innerHTML',task.isComplete() ? 'progress' : 'complete',
       'addEventListener',['click',_=>this._renderer.toggle(task)]),
     el('button','innerHTML','remove',
-      'addEventListener',['click',_=>this._renderer.remove(parent)])
+      'addEventListener',['click',_=>this._renderer.remove(parent,task)])
     ].forEach(v=>this._current.appendChild(v))
   }
 }

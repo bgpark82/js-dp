@@ -81,6 +81,7 @@ const DomRenderer = class {
     this.render();
   }
   remove(parent, task) {
+    console.log(parent)
     parent.remove(task);
     this.render();
   }
@@ -103,6 +104,7 @@ const DomRenderer = class {
             ),nav)
         ,el("nav"))
     );
+    console.log(this)
     this._render(parent, this._list, this._list.getResult(this._sort), 0);
   }
   _render(base, parent, { item, children }, depth) {

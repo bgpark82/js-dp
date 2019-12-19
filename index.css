@@ -1,0 +1,33 @@
+html, body {
+    height: 100%;
+    padding: 0;
+    margin: 0;
+}
+
+.post {
+    margin: 5px;
+    padding: 5px;
+    float:left;
+    width: 340px;
+    border: 1px solid #666;
+    overflow:hidden;
+}
+
+.post a,
+.post a:hover,
+.post a:link {
+    text-decoration: none;
+    color:#666;
+}
+
+.post p {
+    background :#ddd;
+    margin: 5px;
+}
+
+#snack {
+    background:red;
+    color: #fff;
+    line-height: 35px;
+    text-align: center;
+}
