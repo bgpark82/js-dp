@@ -22,12 +22,6 @@ const Subject = class {
         // subject는 여러가지 object가짐
         this._observers = new Set();
     }
-    addObserver(o){
-        this._observers.add(o)
-    };
-    notify(){
-        this._observers.forEach(o => o.observe())
-    }
 }
 const Task = class extends Subject {
     static title(a,b) {return a._title > b._title}
@@ -42,8 +36,6 @@ const Task = class extends Subject {
     add(task){ 
         if(!is(task,Task)) err();
         this._list.push(task);
-        task.addObserver(this._observer);
-        this.notify();
      };
      getTask(sort, stateGroup=true){
         const list = this._list;
@@ -55,16 +47,6 @@ const Task = class extends Subject {
             ).map(v => v.getTask(sort, stateGroup))
         }
     };
-    accept(sort, stateGroup, painter){
-        // _current에 그림 그림 = 현재 task 그리고
-        painter.start(sort, stateGroup, this);
-        // 자식 task의 accept 호출 
-        this.getTask(sort, stateGroup).children.forEach(
-            ({item})=>item.accept(sort,stateGroup, painter)
-        )
-        painter.end();
-    };
-    
 }
 const TaskItem = class extends Task {
     constructor(title, date){
@@ -73,10 +55,6 @@ const TaskItem = class extends Task {
     }
     isComplete(){
         return this._isComplete;
-    }
-    toggle(){
-        this._isComplete = !this._isComplete;
-        this.notify();
     }
 }
 const TaskList = class extends Task {
@@ -87,24 +65,17 @@ const TaskList = class extends Task {
 // ------------------------------------------------------------------------
 
 
-const Observer = class {
+const Observer = class{
     observe() {override()}
 }
 const Renderer = class extends Observer {
     constructor(_task,_visitor){
         super();
-        prop(this,{_task,_visitor:prop(_visitor,{renderer:this}), _sort:'title'});
-        _task.addObserver(this);
-    }
-    observe(){
-        this.render();
+        prop(this,{_task,_visitor:prop(_visitor,{renderer:this}), _sort:'title'})
     }
     render(){
         this._visitor.reset();
         this._visitor.operation(Task[this._sort],true,this._task)
-    }
-    toggle(task){
-        task.toggle();
     }
 }
 const TaskObserver = class extends Observer {
@@ -112,10 +83,6 @@ const TaskObserver = class extends Observer {
         super();
         prop(this,{_task});
     }
-    observe(){
-        this._task.notify();
-    }
-   
 }
 // -----------------------------------------------------------------------
 
