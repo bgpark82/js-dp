@@ -4,9 +4,6 @@ const el = (tag, ...attr) => {
   for (let i = 0; i < attr.length; ) {
     const key = attr[i++];
     const value = attr[i++];
-    console.log(el);
-    console.log(key);
-    console.log(el[key]);
     if (typeof el[key] == "function")
       el[key](...(Array.isArray(value) ? value : [value]));
     else if (key[0] == "@") el.style[key.substr(1)] = value;
