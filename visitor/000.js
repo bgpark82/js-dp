@@ -81,6 +81,8 @@ const DomVisitor = class extends Visitor{
     }
 };
  
+
+
 const is = (target, type) => target instanceof type;
 const type = (target, type) => {
     if (typeof target == "string") {
