@@ -33,7 +33,7 @@ const TaskItem = class extends Task{
 const Renderer = class {
     constructor(taskList, visitor, _0=type(taskList, TaskList),_1=type(visitor, DomVisitor)){
         this._taskList = taskList;
-        this._visitor = Object.assign(visitor,{renderer:this});
+        this._visitor = visitor;
     }
     render(){
         this._visitor.reset();

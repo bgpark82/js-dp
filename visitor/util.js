@@ -16,6 +16,17 @@ const el = (target, ...attr) => {
             el[key](...(Array.isArray(value) ? value : [value]));
         } else if(key[0] == "@") el.style[key.substr(1)] = value
         else el[key] = value;
-        return el;
+        
     }
+    return el;
 }
+
+
+const valid = (data) => {
+    if(data == "null" || data == "undefined" || data == "")
+        throw `invalid ${data}`
+    return data;
+} 
+
+const err = v => {throw v};
+const override = _=> err('override');
