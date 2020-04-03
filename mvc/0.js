@@ -137,7 +137,10 @@ const Home = class extends Controller {
         const model = new HomeModel(true);
         return view.render(model.get(id));
     }
-
+    
+    $list(){
+        app.route('home')
+    }
     $detail(id){
         app.route('home:detail',id);
     }
@@ -145,9 +148,6 @@ const Home = class extends Controller {
         const model = new HomeModel(true);
         model.remove(id);
         this.$list();
-    }
-    $list(){
-        app.route('home')
     }
     $removeDetail(id){
         this.$remove(id);
