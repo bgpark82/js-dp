@@ -41,6 +41,11 @@ const HomeDetailModel = class extends Model{
     get title() {return this._title};
     get id() {return this._id};
     get memo() {return this._memo};
+    edit(title = '', memo = ''){
+        this._title = title
+        this._memo = memo
+        this.notify();
+    }
 }
 
 const HomeModel = class extends Model {
@@ -75,7 +80,7 @@ const HomeModel = class extends Model {
                 return true;
             }
         })) err();
-        this.notify();
+        this.notify();  // 부모 Model의 notify로 이동 -> ctrl.listen(model) -> HomeModel:$list() -> app.route() -> 다 지우고 새로 그리기
     }
 }
 
@@ -104,12 +109,13 @@ const HomeBaseView = class extends View {
 const HomeDetailView = class extends View {
     constructor(controller, isSingleton){
         super(controller, isSingleton);
-    }
+    } 
     render(model, _=type(model, HomeDetailModel)){
         const {_controller:ctrl} = this;
         return append(el('section'),
-            el('h2','innerHTML',model.title),
-            el('p','innerHTML',model.memo),
+            el('input','value',model.title,'className','title','@cssText','display:block'),
+            el('textarea','innerHTML',model.memo,'className','memo','@cssText','display:block'),
+            el('button','innerHTML','edit','addEventListener',['click',_=>ctrl.$editDetail(model.id, sel('.title').value, sel('.memo').value)]),
             el('button','innerHTML','delete','addEventListener',['click',_=>ctrl.$removeDetail(model.id)]),
             el('button','innerHTML','list','addEventListener',['click',_=>ctrl.$list()])
         )
@@ -130,11 +136,13 @@ const Home = class extends Controller {
     base(){
         const view = new HomeBaseView(this, true);
         const model = new HomeModel(true);
+        model.addController(this);
         return view.render(model);
     }
     detail(id){
         const view = new HomeDetailView(this, true);
         const model = new HomeModel(true);
+        model.addController(this)
         return view.render(model.get(id));
     }
     
@@ -152,6 +160,17 @@ const Home = class extends Controller {
     $removeDetail(id){
         this.$remove(id);
         this.$list();
+    }
+    $editDetail(id, title, memo){
+        const model = new HomeModel(true).get(id);
+        model.addController(this);
+        model.edit(title, memo)
+    }
+    listen(model){
+        switch(true){
+            case is(model, HomeModel): return this.$list();
+            case is(model, HomeDetailModel): return this.$detail(model.id)
+        }
     }
 }
 

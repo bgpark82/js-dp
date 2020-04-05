@@ -30,3 +30,14 @@ const valid = (data) => {
 
 const err = v => {throw v};
 const override = _=> err('override');
+
+const append = (parent, ...children) => {
+    children.forEach(child => {
+        parent.appendChild(child);
+    })
+    return parent
+}
+
+const is = (target, type) => {
+    return target instanceof type
+}
