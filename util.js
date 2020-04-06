@@ -5,7 +5,7 @@ const type = (target, type) => {
     return target; 
 }
 
-const sel = (target) => document.querySelector(target);
+const sel = (target, el = document) => el.querySelector(target);
 
 const el = (target, ...attr) => {
     const el = typeof target == "string" ? document.createElement(target) : target;

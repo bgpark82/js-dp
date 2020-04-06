@@ -12,7 +12,7 @@ const singleton = new Singleton;
 
 
 const Observer = class {
-    observer(v) {override();}
+    observe(v) {override();}
 }
 
 const Subject = class extends Set {
@@ -27,7 +27,7 @@ const Subject = class extends Set {
         return super.has(observer);
     }
     notify(...arg){
-        this.forEach(v => arg.length ? v.observe(...arg) : v.observe(this))
+        this.forEach(observer => arg.length ? observer.observe(...arg) : observer.observe(this))
     }
 }
 
@@ -51,7 +51,7 @@ const View = class extends Observer {
         _viewModel.add(this);
     }
 
-    observer(...arg){this.render(...arg)}
+    observe(...arg){this.render(...arg)}
     render() {override()}
 }
 
@@ -132,9 +132,7 @@ const HomeModel =  class extends Model {
     }
     get(id){
         let result;
-        if(!this._list.some(v => {
-            v.id == id ? (result = v) : false
-        }))err()
+        if(!this._list.some(v => v.id == id ? (result = v) : false)) err()
         return result;
     }
 }
@@ -160,6 +158,31 @@ const ListVM =  class extends ViewModel {
     }
 }
 
+const DetailVM = class extends ViewModel {
+    constructor(isSingleton){
+        super(isSingleton)
+    }
+    base(id){
+        this._id = id;
+        const model = new HomeModel(true).get(id);
+        model.add(this.observer);
+        model.notify();
+    }
+    listen(model, _=type(model, HomeDetailModel)){
+        this.notify(model.title,model.memo)
+    }
+    $remove(){
+        const model = new HomeModel(true);
+        model.remove(this._id);
+        this.$list();
+    }
+    $edit(title, memo){
+        const model = new HomeModel(true).get(this._id);
+        model.edit(title,memo);
+    }
+    $list(){app.route('list')}
+}
+
 const HomeDetailView =  class extends View {
     constructor(isSingleton){
         super(el('section'), isSingleton);
@@ -177,7 +200,8 @@ const HomeDetailView =  class extends View {
         )
     }
     render(title, memo){
-        sel('.title',this.view).value = title;
+        const t = sel('.title',this.view)
+        t.value = title;
         sel('.memo',this.view).value = memo;
     }
 }
