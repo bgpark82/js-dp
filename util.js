@@ -21,6 +21,7 @@ const el = (target, ...attr) => {
     return el;
 }
 
+const prop = (target, obj) => Object.assign(target, obj);
 
 const valid = (data) => {
     if(data == "null" || data == "undefined" || data == "")
@@ -41,3 +42,15 @@ const append = (parent, ...children) => {
 const is = (target, type) => {
     return target instanceof type
 }
+
+const Singleton = class extends WeakMap{
+    has(){err()};
+    get(){err()};
+    set(){err()};
+    getInstance(v){
+        if(!super.has(v.constructor)) super.set(v.constructor, v);
+        return super.get(v.constructor);
+    }    
+}
+
+const singleton = new Singleton;

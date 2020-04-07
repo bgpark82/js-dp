@@ -1,48 +1,22 @@
-const Singleton = class extends WeakMap{
-    has(){err()};
-    get(){err()};
-    set(){err()};
-    getInstance(v){
-        if(!super.has(v.constructor)) super.set(v.constructor, v);
-        return super.get(v.constructor);
-    }    
-}
-
-const singleton = new Singleton;
-
-
 const Observer = class {
     observe(v) {override();}
 }
 
-const Subject = class extends Set {
-    add(observer, _=type(observer,Observer)){
-        super.add(observer);
-        return this;
+
+const ViewModelObserver = class extends Observer {
+    constructor(viewModel){
+        super();
+        this._viewModel = viewModel;
     }
-    delete(observer, _=type(observer,Observer)){
-        super.delete(observer);
-    }
-    has(observer, _=type(observer,Observer)){
-        return super.has(observer);
-    }
-    notify(...arg){
-        this.forEach(observer => arg.length ? observer.observe(...arg) : observer.observe(this))
-    }
+    observe(v){this._viewModel.listen(v)};
 }
 
-const Model = class extends Subject {
-    constructor(isSingleton){
-        super();
-        if(isSingleton) return singleton.getInstance(this)
-    }
-}
 
 const View = class extends Observer {
-    constructor(view, isSingleton){
+    constructor(_view, isSingleton = false){
         super();
-        this.isSingleton = (isSingleton) ? singleton.getInstance(this) : this,
-        this._view = view;
+        return prop(isSingleton ? singleton.getInstance(this): this, {_view})
+
     }
     get view() {return this._view}
     get viewModel(){return this._viewModel;}
@@ -55,24 +29,8 @@ const View = class extends Observer {
     render() {override()}
 }
 
-const ViewModelObserver = class extends Observer {
-    constructor(viewModel){
-        super();
-        this._viewModel = viewModel;
-    }
-    observe(v){this._viewModel.listen(v)};
-}
 
-const ViewModel = class extends Subject {
-    constructor(isSingleton){
-        super();
-        const target = isSingleton ? singleton.getInstance(this) : this;
-        Object.assign(target, {_observer:new ViewModelObserver(target)})
-        return target;
-    }
-    get observer(){return this._observer;}
-    listen(model){}
-}
+
 
 const HomeBaseView = class extends View {
     constructor(isSingleton){
@@ -90,51 +48,59 @@ const HomeBaseView = class extends View {
     }
 }
 
-const HomeDetailModel = class extends Model {
-    constructor(_id, title, memo){
-        super()
-        this._id = _id;
-        this.edit(title, memo)
+
+
+const HomeDetailView =  class extends View {
+    constructor(isSingleton){
+        super(el('section'), isSingleton);
+        const {view} = this;
+        append(el(view,'innerHTML',''),
+            el('input','className','title','@cssText','display:block'),
+            el('textarea','className','memo','@cssText','display:block'),
+            el('button','innerHTML','edit','addEventListener',
+                ['click',_=>this.viewModel.$edit(sel('.title',view).value,sel('.memo',view).value)]),
+            el('button','innerHTML','delete','addEventListener',
+                ['click',_=>this.viewModel.$remove()]),
+            el('button','innerHTML','list','addEventListener',
+                ['click',_=>this.viewModel.$list()]),
+
+        )
     }
-    edit(_title, _memo){
-        this._title = _title;
-        this._memo = _memo;
-        this.notify()
+    render(title, memo){
+        const t = sel('.title',this.view)
+        t.value = title;
+        sel('.memo',this.view).value = memo;
     }
-    get title(){return this._title}
-    get id(){return this._id}
-    get memo(){return this._memo}
 }
 
-const HomeModel =  class extends Model {
+
+// ---------------------------------------------------------------------------------------------
+
+const Subject = class extends Set {
+    add(observer, _=type(observer,Observer)){
+        super.add(observer);
+        return this;
+    }
+    delete(observer, _=type(observer,Observer)){
+        super.delete(observer);
+    }
+    has(observer, _=type(observer,Observer)){
+        return super.has(observer);
+    }
+    notify(...arg){
+        this.forEach(observer => arg.length ? observer.observe(...arg) : observer.observe(this))
+    }
+}
+
+const ViewModel = class extends Subject {
     constructor(isSingleton){
-        super(isSingleton)
-        if(!this._list){
-            Object.assign(this, {_list:[
-                new HomeDetailModel(1,'todo1','memo1'),
-                new HomeDetailModel(2,'todo2','memo2'),
-                new HomeDetailModel(3,'todo3','memo3'),
-                new HomeDetailModel(4,'todo4','memo4'),
-                new HomeDetailModel(5,'todo5','memo5'),
-            ]})
-        }
+        super();
+        const target = isSingleton ? singleton.getInstance(this) : this
+        prop(target, {_observer:new ViewModelObserver(target)})
+        return target;
     }
-    get list() {return this._list}
-    remove(id){
-        const {_list:list} = this;
-        if(!list.some((v,i)=>{
-            if(v.id == id){
-                list.splice(i,1);
-                return true;
-            }
-        })) err()
-        this.notify()
-    }
-    get(id){
-        let result;
-        if(!this._list.some(v => v.id == id ? (result = v) : false)) err()
-        return result;
-    }
+    get observer(){return this._observer;}
+    listen(model){}
 }
 
 const ListVM =  class extends ViewModel {
@@ -183,28 +149,61 @@ const DetailVM = class extends ViewModel {
     $list(){app.route('list')}
 }
 
-const HomeDetailView =  class extends View {
+const Model = class extends Subject {
     constructor(isSingleton){
-        super(el('section'), isSingleton);
-        const {view} = this;
-        append(el(view,'innerHTML',''),
-            el('input','className','title','@cssText','display:block'),
-            el('textarea','className','memo','@cssText','display:block'),
-            el('button','innerHTML','edit','addEventListener',
-                ['click',_=>this.viewModel.$edit(sel('.title',view).value,sel('.memo',view).value)]),
-            el('button','innerHTML','delete','addEventListener',
-                ['click',_=>this.viewModel.$remove()]),
-            el('button','innerHTML','list','addEventListener',
-                ['click',_=>this.viewModel.$list()]),
-
-        )
-    }
-    render(title, memo){
-        const t = sel('.title',this.view)
-        t.value = title;
-        sel('.memo',this.view).value = memo;
+        super();
+        if(isSingleton) return singleton.getInstance(this)
     }
 }
+
+
+const HomeDetailModel = class extends Model {
+    constructor(_id, title, memo){
+        super()
+        this._id = _id;
+        this.edit(title, memo)
+    }
+    edit(_title, _memo){
+        this._title = _title;
+        this._memo = _memo;
+        this.notify()
+    }
+    get title(){return this._title}
+    get id(){return this._id}
+    get memo(){return this._memo}
+}
+
+const HomeModel =  class extends Model {
+    constructor(isSingleton){
+        super(isSingleton)
+        if(!this._list){
+            Object.assign(this, {_list:[
+                new HomeDetailModel(1,'todo1','memo1'),
+                new HomeDetailModel(2,'todo2','memo2'),
+                new HomeDetailModel(3,'todo3','memo3'),
+                new HomeDetailModel(4,'todo4','memo4'),
+                new HomeDetailModel(5,'todo5','memo5'),
+            ]})
+        }
+    }
+    get list() {return this._list}
+    remove(id){
+        const {_list:list} = this;
+        if(!list.some((v,i)=>{
+            if(v.id == id){
+                list.splice(i,1);
+                return true;
+            }
+        })) err()
+        this.notify()
+    }
+    get(id){
+        let result;
+        if(!this._list.some(v => v.id == id ? (result = v) : false)) err()
+        return result;
+    }
+}
+
 
 const App = class {
     constructor(parent){
