@@ -2,10 +2,54 @@ const Observer = class {
     observe(v) {override()}
 }
 
+// {set}
+const ViewModelObserver = class extends Observer{
+    constructor(viewModel) {
+        super();
+        this._viewModel = viewModel;
+    }
+    observe(model){
+        this._viewModel.listen(model)
+    }
+}
+
+const View = class extends Observer{
+    constructor(tag, isSingleton = false) {
+        super();
+        prop(isSingleton ? singleton.getInstance(this) : this, {_tag:tag})
+    }
+
+    get tag() { return this._tag}
+    get viewModel() {return this._viewModel}
+    set viewModel(_viewModel){
+        prop(this, {_viewModel})
+        _viewModel.add(this);
+    }
+
+    observe(...arg){this.render(...arg)}
+    render(){override()}
+}
+
+const HomeBaseView = class extends View{
+    constructor(isSinglton){
+        super(el('ul'),isSinglton)
+    }
+    render(model){
+        const {viewModel, tag} = this;
+        append(el(tag,'innerHTML',''), ...model.map(m => append(
+            el('li'),
+            el('a','innerHTML',m.title)
+        )))
+    }
+}
+
+// -----------------------------------------------------------------------------
+
+
+
 const Subject = class extends Set {
     add(observer){
         super.add(observer)
-        return this;
     }
     notify(...arg){
         this.forEach(observer => arg.length ? observer.observe(...arg) : observer.observe(this))
@@ -48,49 +92,7 @@ const HomeDetailModel = class extends Model {
     get title() {return this._title}
 }
 
-const View = class extends Observer{
-    constructor(tag, isSingleton = false) {
-        super();
-        return prop(isSingleton ? singleton.getInstance(this) : this, {_tag:tag})
-    }
-
-    get tag() { return this._tag}
-    get viewModel() {return this._viewModel}
-    set viewModel(_viewModel){
-        prop(this, {_viewModel})
-        _viewModel.add(this);
-    }
-
-    observe(...arg){this.render(...arg)}
-    render(){override()}
-}
-
-const HomeBaseView = class extends View{
-    constructor(isSinglton){
-        super(el('ul'),isSinglton)
-    }
-    render(model){
-        const {viewModel, tag} = this;
-        append(el(tag,'innerHTML',''), ...model.map(m => append(
-            el('li'),
-            el('a','innerHTML',m.title)
-        )))
-    }
-}
-
-
-
-// {set}
-const ViewModelObserver = class extends Observer{
-    constructor(viewModel) {
-        super();
-        this._viewModel = viewModel;
-    }
-    observe(model){
-        this._viewModel.listen(model)
-    }
-}
-
+// -----------------------------------------------------------------------------
 
 // {set(), viewmodelobserver}
 const ViewModel = class extends Subject{
@@ -98,7 +100,6 @@ const ViewModel = class extends Subject{
         super();
         const target = isSinglton ? singleton.getInstance(this) : this;
         prop(target, {_observer: new ViewModelObserver(target)})
-        return target; 
     }
     get observer(){return this._observer}
 
@@ -116,6 +117,8 @@ const ListVM = class extends ViewModel{
         this.notify(model.list)
     }
 }
+
+// -----------------------------------------------------------------------------
 
 const App = class{
     constructor(parent) {
